@@ -1,0 +1,14 @@
+binary: main.o libreverse1.a
+	gcc -o binary main.o -L. -lreverse1
+
+main.o: main.c
+	gcc -c main.c
+
+libreverse1.a: revert_string.o
+	ar cr libreverse1.a revert_string.o
+
+revert_string.o: revert_string.c 
+	gcc -c revert_string.c 
+
+clean:
+	rm -f *.o *.a binary

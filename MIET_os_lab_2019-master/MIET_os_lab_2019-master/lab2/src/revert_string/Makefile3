@@ -1,0 +1,14 @@
+binary3: tests.o libreverse3.so
+	gcc -o binary3 tests.o -L. -lreverse3 -Wl,-rpath,. -lcunit
+
+tests.o: tests.c
+	gcc -c tests.c
+
+libreverse3.so: revert_string.o
+	gcc -shared -o libreverse3.so revert_string.o
+
+revert_string.o: revert_string.c 
+	gcc -c -fPIC revert_string.c 
+
+clean:
+	rm -f *.o *.so binary

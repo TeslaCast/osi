@@ -1,0 +1,14 @@
+binary2: main.o libreverse2.so
+	gcc -o binary2 main.o -L. -lreverse2 -Wl,-rpath,.
+
+main.o: main.c
+	gcc -c main.c
+
+libreverse2.so: revert_string.o
+	gcc -shared -o libreverse2.so revert_string.o
+
+revert_string.o: revert_string.c 
+	gcc -c -fPIC revert_string.c 
+
+clean:
+	rm -f *.o *.so binary
