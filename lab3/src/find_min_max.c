@@ -1,5 +1,4 @@
 #include "find_min_max.h"
-
 #include <limits.h>
 
 struct MinMax GetMinMax(int *array, unsigned int begin, unsigned int end) {
