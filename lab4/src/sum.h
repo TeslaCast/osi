@@ -1,7 +1,15 @@
-struct Sum_Args {
+// sum.h
+#ifndef SUM_H
+#define SUM_H
+
+#include <stdint.h>
+
+struct SumArgs {
   int *array;
   int begin;
   int end;
 };
 
-int Sum(const struct Sum_Args *args);
+int Sum(const struct SumArgs *args);
+
+#endif // SUM_H
