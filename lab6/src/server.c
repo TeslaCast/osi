@@ -7,7 +7,6 @@
 
 #include <getopt.h>
 #include <netinet/in.h>
-#include <netinet/ip.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 
@@ -34,15 +33,17 @@ uint64_t MultModulo(uint64_t a, uint64_t b, uint64_t mod) {
 
 uint64_t Factorial(const struct FactorialArgs *args) {
   uint64_t ans = 1;
-
-  // TODO: your code here
-
+  for (uint64_t i = args->begin; i <= args->end; i++) {
+    ans *= i % args->mod;
+    ans %= args->mod;
+  }
   return ans;
 }
 
 void *ThreadFactorial(void *args) {
   struct FactorialArgs *fargs = (struct FactorialArgs *)args;
-  return (void *)(uint64_t *)Factorial(fargs);
+  uint64_t result = Factorial(fargs);
+  return (void *)(uint64_t *)result;
 }
 
 int main(int argc, char **argv) {
@@ -67,11 +68,17 @@ int main(int argc, char **argv) {
       switch (option_index) {
       case 0:
         port = atoi(optarg);
-        // TODO: your code here
+        if (port <= 0) {
+          printf("port is a positive number\n");
+          return 1;
+        }
         break;
       case 1:
         tnum = atoi(optarg);
-        // TODO: your code here
+        if (tnum <= 0) {
+          printf("tnum is a positive number\n");
+          return 1;
+        }
         break;
       default:
         printf("Index %d is out of options\n", option_index);
@@ -87,7 +94,7 @@ int main(int argc, char **argv) {
   }
 
   if (port == -1 || tnum == -1) {
-    fprintf(stderr, "Using: %s --port 20001 --tnum 4\n", argv[0]);
+    fprintf(stderr, "Usage: %s --port 20001 --tnum 4\n", argv[0]);
     return 1;
   }
 
@@ -145,8 +152,6 @@ int main(int argc, char **argv) {
         break;
       }
 
-      pthread_t threads[tnum];
-
       uint64_t begin = 0;
       uint64_t end = 0;
       uint64_t mod = 0;
@@ -154,17 +159,18 @@ int main(int argc, char **argv) {
       memcpy(&end, from_client + sizeof(uint64_t), sizeof(uint64_t));
       memcpy(&mod, from_client + 2 * sizeof(uint64_t), sizeof(uint64_t));
 
-      fprintf(stdout, "Receive: %llu %llu %llu\n", begin, end, mod);
+      fprintf(stdout, "Received: %lu %lu %lu\n", begin, end, mod);
 
       struct FactorialArgs args[tnum];
+      uint64_t segments = (end - begin + 1) / tnum;
+      pthread_t threads[tnum];
+
       for (uint32_t i = 0; i < tnum; i++) {
-        // TODO: parallel somehow
-        args[i].begin = 1;
-        args[i].end = 1;
+        args[i].begin = begin + i * segments;
+        args[i].end = ((i != tnum - 1) ? begin + (i + 1) * segments : end);
         args[i].mod = mod;
 
-        if (pthread_create(&threads[i], NULL, ThreadFactorial,
-                           (void *)&args[i])) {
+        if (pthread_create(&threads[i], NULL, ThreadFactorial, (void *)&args[i])) {
           printf("Error: pthread_create failed!\n");
           return 1;
         }
@@ -177,7 +183,7 @@ int main(int argc, char **argv) {
         total = MultModulo(total, result, mod);
       }
 
-      printf("Total: %llu\n", total);
+      fprintf(stdout, "Total: %lu\n", total);
 
       char buffer[sizeof(total)];
       memcpy(buffer, &total, sizeof(total));
