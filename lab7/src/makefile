@@ -1,28 +1,25 @@
-all: tcpclient tcpserver udpclient udpserver
+CC = gcc
+CFLAGS = -Wall -O2
 
-tcpserver : tcpserver.o 
-	gcc -o tcpserver tcpserver.o 
+# Исходники
+SRC = tcpserver.c tcpclient.c udpserver.c udpclient.c
 
-tcpserver.o : tcpserver.c
-	gcc -c tcpserver.c
+# Целевые имена исполняемых файлов
+TARGETS = tcpserver tcpclient udpserver udpclient
 
-tcpclient : tcpclient.o 
-	gcc -o tcpclient tcpclient.o 
+all: $(TARGETS)
 
-tcpclient.o : tcpclient.c
-	gcc -c tcpclient.c 
+tcpserver: tcpserver.c
+	$(CC) $(CFLAGS) -o tcpserver tcpserver.c
 
-udpserver : udpserver.o 
-	gcc -o udpserver udpserver.o 
+tcpclient: tcpclient.c
+	$(CC) $(CFLAGS) -o tcpclient tcpclient.c
 
-udpserver.o : udpserver.c
-	gcc -c udpserver.c
+udpserver: udpserver.c
+	$(CC) $(CFLAGS) -o udpserver udpserver.c
 
-udpclient : udpclient.o 
-	gcc -o udpclient udpclient.o 
+udpclient: udpclient.c
+	$(CC) $(CFLAGS) -o udpclient udpclient.c
 
-tcpclient.o : tcpclient.c
-	gcc -c tcpclient.c 
-
-clean :
-	rm tcpclient.o tcpserver.o udpclient.o udpserver.o tcpclient tcpserver udpclient udpserver
+clean:
+	rm -f $(TARGETS)
